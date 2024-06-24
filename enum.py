@@ -9,7 +9,10 @@ credential = DefaultAzureCredential()
 # Replace with your subscription ID
 subscription_id = os.getenv('AZURE_SUBSCRIPTION_ID')
 
-# Initialize Resource Management Client to list resource groups
+if not subscription_id:
+    raise ValueError("Please set the AZURE_SUBSCRIPTION_ID environment variable.")
+
+# Initialize Resource Management Client
 resource_client = ResourceManagementClient(credential, subscription_id)
 
 # Initialize KeyVault Management Client
@@ -27,6 +30,6 @@ def list_keyvaults_in_resource_group(resource_group_name):
 if __name__ == "__main__":
     # Get and print Key Vault names in the specified resource group
     keyvault_names = list_keyvaults_in_resource_group(resource_group_name)
-    print("Key Vaults in resource group '{}':".format(resource_group_name))
+    print(f"Key Vaults in resource group '{resource_group_name}':")
     for name in keyvault_names:
         print(name)
