@@ -1,35 +1,41 @@
-from azure.identity import DefaultAzureCredential
+import logging
+from azure.identity import ManagedIdentityCredential
 from azure.mgmt.keyvault import KeyVaultManagementClient
-from azure.mgmt.resource import ResourceManagementClient
-import os
+from azure.core.exceptions import HttpResponseError
 
-# Authenticate using managed identity
-credential = DefaultAzureCredential()
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
-# Replace with your subscription ID
-subscription_id = os.getenv('AZURE_SUBSCRIPTION_ID')
-
-if not subscription_id:
-    raise ValueError("Please set the AZURE_SUBSCRIPTION_ID environment variable.")
-
-# Initialize Resource Management Client
-resource_client = ResourceManagementClient(credential, subscription_id)
-
-# Initialize KeyVault Management Client
-keyvault_client = KeyVaultManagementClient(credential, subscription_id)
-
-# Replace with your resource group name
+# Replace these with your Azure subscription ID and resource group name
+subscription_id = 'your-subscription-id'
 resource_group_name = 'your-resource-group-name'
 
-# Function to list all Key Vaults in a resource group
-def list_keyvaults_in_resource_group(resource_group_name):
-    keyvaults = keyvault_client.vaults.list_by_resource_group(resource_group_name)
-    keyvault_names = [kv.name for kv in keyvaults]
-    return keyvault_names
+try:
+    # Authenticate using managed identity
+    logging.info("Authenticating with Azure using managed identity...")
+    credential = ManagedIdentityCredential()
 
-if __name__ == "__main__":
-    # Get and print Key Vault names in the specified resource group
-    keyvault_names = list_keyvaults_in_resource_group(resource_group_name)
-    print(f"Key Vaults in resource group '{resource_group_name}':")
-    for name in keyvault_names:
-        print(name)
+    # Create a KeyVaultManagementClient instance
+    logging.info("Creating KeyVaultManagementClient instance...")
+    keyvault_client = KeyVaultManagementClient(credential, subscription_id)
+
+    # List all key vaults in the specified resource group
+    logging.info(f"Listing Key Vaults in resource group: {resource_group_name}...")
+    key_vaults = keyvault_client.vaults.list_by_resource_group(resource_group_name)
+
+    # Print the details of each key vault
+    vaults_found = False
+    for kv in key_vaults:
+        vaults_found = True
+        logging.info(f"Key Vault Name: {kv.name}")
+        logging.info(f"Location: {kv.location}")
+        logging.info(f"Resource ID: {kv.id}")
+        logging.info("------")
+
+    if not vaults_found:
+        logging.info(f"No Key Vaults found in the specified resource group '{resource_group_name}'.")
+
+except HttpResponseError as e:
+    logging.error(f"HTTP response error: {e.message}")
+except Exception as e:
+    logging.error(f"An error occurred: {str(e)}")
