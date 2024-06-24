@@ -3,8 +3,8 @@ from azure.mgmt.keyvault import KeyVaultManagementClient
 from azure.core.exceptions import HttpResponseError
 
 # Replace these with your Azure subscription ID and resource group name
-subscription_id = 'your-subscription-id'
-resource_group_name = 'your-resource-group-name'
+subscription_id = '3a89d508-f992-4729-9058-ba4fae9a35ca'
+resource_group_name = 'sandbox-nl03398-1717155333-rg'
 
 try:
     # Authenticate using managed identity
